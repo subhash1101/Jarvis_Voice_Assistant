@@ -1,0 +1,11 @@
+pvporcupine
+sounddevice
+pyttsx3
+numpy
+pywhatkit
+pyautogui
+wmi
+comtypes
+pycaw
+SpeechRecognition
+pyaudio 
