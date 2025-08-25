@@ -12,6 +12,7 @@ import random
 import wmi
 import subprocess
 import glob
+import urllib
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -205,6 +206,29 @@ def execute_command(command):
                     print(f"Could not find movie: {movie_name}")
                     return
 
+    search_patterns = [
+        r'(search|find|look up|google)\s+(.*)'
+    ]
+    for pattern in search_patterns:
+        match = re.search(pattern, command)
+        if match:
+            query = match.group(2).strip()
+
+            # Remove filler words
+            query = query.replace("on google", "").replace("in google", "").strip()
+            query = query.replace("on youtube", "").replace("in youtube", "").strip()
+
+            if "google" in command:
+                search_url = f"https://www.google.com/search?q={urllib.parse.quote(query)}"
+                webbrowser.open(search_url)
+                print(f"🔎 Searching for '{query}' on Google...")
+                return
+            else:
+                search_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(query)}"
+                webbrowser.open(search_url)
+                print(f"🔎 Searching for '{query}' on YouTube...")
+                return
+            
     open_patterns = [
         r'(open|start|launch|run).*?(.*)',
         r'(.*)',
@@ -223,6 +247,10 @@ def execute_command(command):
                     webbrowser.open("https://www.youtube.com")
                     print("Opening YouTube...")
                     return
+                if any(word in app_name for word in ['Leetcode']):
+                    webbrowser.open("https://leetcode.com/problemset/")
+                    print("Opening Leetcode...")
+                    return
                 if any(word in app_name for word in ['google', 'search']):
                     webbrowser.open("https://www.google.com")
                     print("Opening Google...")
@@ -233,11 +261,12 @@ def execute_command(command):
                     return
                 if open_application(app_name):
                     return
+   
 
+    # ✅ Play patterns (only if "search" not mentioned)
     play_patterns = [
-        r'(play|start|put on)\s+(?:song|music|track|video)\s+(.+)',
-        r'(play|start|put on)\s+(.+)',
-        r'(song|music|track)\s+(.+)',
+        r'(play|start|put on)\s+(?:song|music|track|video)?\s*(.+)',
+        r'(song|music|track)\s+(.+)'
     ]
     for pattern in play_patterns:
         match = re.search(pattern, command)
@@ -246,21 +275,7 @@ def execute_command(command):
             if song_name and len(song_name.strip()) > 2:
                 song_name = song_name.strip()
                 pywhatkit.playonyt(song_name)
-                print(f"Playing '{song_name}' on YouTube...")
-                return
-
-    search_patterns = [
-        r'(search|find|look up|google).*?(for|about).*?(.*)',
-        r'(search|find|look up|google).*?(.*)'
-    ]
-    for pattern in search_patterns:
-        match = re.search(pattern, command)
-        if match:
-            query = match.group(2) if len(match.groups()) >= 2 else match.group(1)
-            if query and len(query.strip()) > 2:
-                query = query.strip()
-                pywhatkit.search(query)
-                print(f"Searching for '{query}'...")
+                print(f"▶ Playing '{song_name}' on YouTube...")
                 return
 
     time_patterns = [
