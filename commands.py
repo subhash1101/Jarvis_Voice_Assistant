@@ -17,6 +17,19 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
+def speak(text):
+    """Speak the given text and also print it."""
+    print("Jarvis:", text)
+    try:
+        import pyttsx3
+        engine = pyttsx3.init()
+        voices = engine.getProperty('voices')
+        engine.setProperty('voice', voices[0].id)  # Use first available voice
+        engine.say(text)
+        engine.runAndWait()
+    except Exception as e:
+        print(f"[Speak Error] {e}")
+
 def set_brightness(level):
     level = max(0, min(level, 100))
     c = wmi.WMI(namespace='wmi')
@@ -100,10 +113,10 @@ def find_and_open_movie(movie_name):
                             if file_ext in video_extensions:
                                 try:
                                     os.startfile(file_path)
-                                    print(f"Opening movie: {file}")
+                                    speak(f"Opening movie: {file}")
                                     return True
                                 except Exception as e:
-                                    print(f"Could not open {file}: {e}")
+                                    speak(f"Could not open {file}: {e}")
                                     continue
             except Exception as e:
                 continue
@@ -139,10 +152,10 @@ def open_application(app_name):
         if key in app_name.lower():
             try:
                 subprocess.Popen(value)
-                print(f"Opening {key}...")
+                speak(f"Opening {key}...")
                 return True
             except:
-                print(f"Could not open {key}")
+                speak(f"Could not open {key}")
                 return False
     return False
 
@@ -158,7 +171,7 @@ def execute_command(command):
             level = extract_number(command)
             if level is not None:
                 set_brightness(level)
-                print(f"Brightness set to {level}%")
+                speak(f"Brightness set to {level}%")
                 return
 
     volume_patterns = [
@@ -171,7 +184,7 @@ def execute_command(command):
             percent = extract_number(command)
             if percent is not None:
                 set_volume(percent)
-                print(f"Volume set to {percent}%")
+                speak(f"Volume set to {percent}%")
                 return
 
     game_patterns = [
@@ -221,12 +234,12 @@ def execute_command(command):
             if "google" in command:
                 search_url = f"https://www.google.com/search?q={urllib.parse.quote(query)}"
                 webbrowser.open(search_url)
-                print(f"🔎 Searching for '{query}' on Google...")
+                speak(f"Searching for '{query}' on Google...")
                 return
             else:
                 search_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(query)}"
                 webbrowser.open(search_url)
-                print(f"🔎 Searching for '{query}' on YouTube...")
+                speak(f"Searching for '{query}' on YouTube...")
                 return
             
     open_patterns = [
@@ -241,23 +254,23 @@ def execute_command(command):
                 app_name = app_name.strip()
                 if any(word in app_name for word in ['gmail', 'email', 'mail']):
                     webbrowser.open("https://mail.google.com")
-                    print("Opening Gmail...")
+                    speak("Opening Gmail")
                     return
                 if any(word in app_name for word in ['youtube', 'yt', 'video']):
                     webbrowser.open("https://www.youtube.com")
-                    print("Opening YouTube...")
+                    speak("Opening YouTube...")
                     return
                 if any(word in app_name for word in ['Leetcode']):
                     webbrowser.open("https://leetcode.com/problemset/")
-                    print("Opening Leetcode...")
+                    speak("Opening Leetcode...")
                     return
                 if any(word in app_name for word in ['google', 'search']):
                     webbrowser.open("https://www.google.com")
-                    print("Opening Google...")
+                    speak("Opening Google...")
                     return
                 if any(word in app_name for word in ['instagram', 'insta']):
                     webbrowser.open("https://www.instagram.com")
-                    print("Opening Instagram...")
+                    speak("Opening Instagram...")
                     return
                 if open_application(app_name):
                     return
@@ -275,7 +288,7 @@ def execute_command(command):
             if song_name and len(song_name.strip()) > 2:
                 song_name = song_name.strip()
                 pywhatkit.playonyt(song_name)
-                print(f"▶ Playing '{song_name}' on YouTube...")
+                speak(f"Playing '{song_name}' on YouTube...")
                 return
 
     time_patterns = [
@@ -286,7 +299,7 @@ def execute_command(command):
     for pattern in time_patterns:
         if re.search(pattern, command):
             now = datetime.datetime.now().strftime("%I:%M %p")
-            print(f"The current time is {now}")
+            speak(f"The current time is {now}")
             return
 
     screenshot_patterns = [
@@ -296,8 +309,9 @@ def execute_command(command):
     for pattern in screenshot_patterns:
         if re.search(pattern, command):
             filename = f"screenshot_{int(time.time())}.png"
-            pyautogui.screenshot(filename)
-            print(f"Screenshot saved as {filename}")
+            filepath = os.path.join(r"C:\Users\subha\OneDrive\Pictures\Screenshots", filename)
+            pyautogui.screenshot(filepath)
+            speak("Screenshot captured")
             return
 
     if any(word in command for word in ['help', 'what can you do', 'commands', 'options']):
