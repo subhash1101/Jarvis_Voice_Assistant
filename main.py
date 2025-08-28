@@ -11,7 +11,7 @@ from datetime import datetime
 from commands import execute_command
 
 # ---------------------- CONFIG ----------------------
-ACCESS_KEY = "5AGyRzeaksvWwAH6GVMgfFLzOIOzfpKbYdtIa84e/kCNJZiMRZE9Gw=="  # Replace with your actual key
+ACCESS_KEY = "########################################################" Replace with your actual key
 
 # ---------------------- SPEAK QUEUE + THREAD ----------------------
 speak_queue = queue.Queue()
